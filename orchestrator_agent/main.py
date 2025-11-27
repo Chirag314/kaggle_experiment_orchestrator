@@ -8,22 +8,22 @@ Usage (from project root):
 """
 
 from pathlib import Path
-from .tools import load_experiments, summarize_experiments, format_summary_text
+
+from .orchestrator import run_portfolio_analysis
 
 
 def main() -> None:
     project_root = Path(__file__).resolve().parents[1]
     experiments_path = project_root / "data" / "sample_experiments.csv"
 
-    print(f"Loading experiments from : {experiments_path}")
+    print(f"Running portfolio analysis for: {experiments_path}")
 
-    df = load_experiments(experiments_path)
-    summary = summarize_experiments(df)
-    text = format_summary_text(summary)
+    result = run_portfolio_analysis(experiments_path, verbose=True)
 
-    print("\n===== EXPERIMENT PORTFOLIO SUMMARY =====\n")
-    print(text)
-    print("\n========================================\n")
+    # For now we don't do anything with `result` beyond printing it,
+    # but later our "agent" can use this dictionary to plan next experiments.
+    # This makes it easier to connect to an ADK / LLM agent later.
+    _ = result
 
 
 if __name__ == "__main__":
