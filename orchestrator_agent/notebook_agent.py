@@ -1,19 +1,7 @@
-# orchestrator_agent/notebook_agent.py
-
-"""
-Notebook-friendly entry points for the Gemini-powered agent.
-
-Use these in:
-  - local Jupyter notebooks
-  - Kaggle notebooks
-
-They avoid interactive input() loops and just expose a simple
-function: answer_question(question, experiments_path).
-"""
-
 from __future__ import annotations
 
 import os
+import json
 from pathlib import Path
 from typing import Optional
 
@@ -41,22 +29,12 @@ def answer_question(
     """
     Answer a single question about the experiment portfolio.
 
-    Parameters
-    ----------
-    question : str
-        Natural language question (e.g. 'Which experiment is best?').
-    experiments_path : str, optional
-        Path to the experiments CSV. If None, use the default sample CSV
-        under data/sample_experiments.csv.
-    model : str
-        Gemini model name.
-    temperature : float
-        Sampling temperature.
+    Instead of using function tools, this:
+      - runs tool_run_portfolio_analysis() directly in Python
+      - packages the summary + text report into a prompt
+      - lets Gemini answer based on that context
 
-    Returns
-    -------
-    str
-        The agent's answer as plain text.
+    This avoids google-genai's automatic tool-calling bugs in some environments.
     """
     client = _build_client()
 
@@ -65,32 +43,42 @@ def answer_question(
         project_root = Path(__file__).resolve().parents[1]
         experiments_path = str(project_root / "data" / "sample_experiments.csv")
 
-    tools = [
-        adk_tools.tool_run_portfolio_analysis,
-        adk_tools.tool_get_best_experiment,
-        adk_tools.tool_get_overfitting_info,
-        adk_tools.tool_get_time_stats,
-    ]
+    # 1) Run your Python tools directly
+    result = adk_tools.tool_run_portfolio_analysis(experiments_path)
+    summary = result["summary"]
+    text_report = result["text_report"]
 
-    system_instruction = (
-        "You are a Kaggle experiment portfolio assistant. "
-        "You have access to Python tools that analyze a CSV of experiments. "
-        "Use these tools whenever the question requires knowledge of the "
-        "experiments, and answer clearly and concisely."
-    )
+    # 2) Build a rich prompt with JSON + human-readable summary
+    context_json = json.dumps(summary, indent=2)
 
-    # We include the experiments_path in the user message so the model
-    # understands which file to analyze if it decides to call tools.
-    user_prompt = f"Experiments CSV path: {experiments_path}\n\nQuestion: {question}"
+    prompt = f"""
+You are a Kaggle experiment portfolio assistant.
 
+You are given:
+1) A JSON summary of experiments (per-model stats, best experiment, overfitting info, times).
+2) A human-readable text report.
+3) A user question.
+
+Use ONLY this information to answer the question clearly and concisely.
+If something is not available in the data, say so.
+
+=== EXPERIMENT SUMMARY (JSON) ===
+{context_json}
+
+=== EXPERIMENT REPORT (TEXT) ===
+{text_report}
+
+=== USER QUESTION ===
+{question}
+"""
+
+    # 3) Ask Gemini to answer based on this context
     response = client.models.generate_content(
         model=model,
-        contents=user_prompt,
+        contents=prompt,
         config=genai_types.GenerateContentConfig(
-            tools=tools,
-            system_instruction=system_instruction,
             temperature=temperature,
         ),
     )
 
-    return response.text
+    return response.text.strip()
