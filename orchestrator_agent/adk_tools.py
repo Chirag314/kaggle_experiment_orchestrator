@@ -158,3 +158,25 @@ def tool_suggest_next_experiments(experiments_path=None):
         "suggestions": suggestions,
         "rationale": rationale,
     }
+
+
+def tool_rank_experiments(experiments_path=None, strategy="balanced"):
+    """
+    Rank experiments and return a compact view (id, model_type, rank_score, cv, holdout, time).
+    """
+    from .tools import load_experiments  # local import to avoid cycles
+    from .ranking import rank_experiments
+
+    df = load_experiments(experiments_path)
+    ranked = rank_experiments(df, strategy=strategy)
+
+    cols = [
+        "experiment_id",
+        "model_type",
+        "cv_metric",
+        "holdout_metric",
+        "train_time_seconds",
+        "rank_score",
+    ]
+    existing_cols = [c for c in cols if c in ranked.columns]
+    return ranked[existing_cols].to_dict(orient="records")
