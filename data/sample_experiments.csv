@@ -1,0 +1,6 @@
+experiment_id,model_type,features_desc,params_summary,cv_metric,holdout_metric,train_time_seconds,notes
+exp_01,LightGBM,"numeric only","lr=0.05, depth=6",0.845,0.842,120,"baseline"
+exp_02,LightGBM,"numeric + freq-enc cats","lr=0.05, depth=6",0.872,0.868,180,"added basic categorical features"
+exp_03,CatBoost,"numeric + cats","lr=0.03, depth=8",0.869,0.867,220,"stable but slower"
+exp_04,RandomForest,"numeric only","n_estimators=500",0.830,0.810,300,"overfits, much slower"
+exp_05,LightGBM,"numeric + freq-enc cats + poly","lr=0.05, depth=7",0.880,0.861,260,"slight cv gain but bigger gap"
