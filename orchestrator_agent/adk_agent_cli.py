@@ -1,14 +1,16 @@
 # orchestrator_agent/adk_agent_cli.py
 
 """
-LLM-powered agent using Gemini + our tools.
+LLM-powered agent using Gemini + our tools, using google-genai's
+automatic Python function calling.
 
 Usage (from project root):
+
     python -m orchestrator_agent.adk_agent_cli
 
 This will:
-  - Load Gemini using GOOGLE_API_KEY
-  - Expose our portfolio tools as function tools
+  - Load Gemini using GOOGLE_API_KEY or GEMINI_API_KEY
+  - Expose our portfolio tools as Python function tools
   - Start a chat loop where Gemini decides which tools to call
 """
 
@@ -16,7 +18,6 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any, Dict, List
 
 from google import genai
 from google.genai import types as genai_types
@@ -25,124 +26,60 @@ from . import adk_tools
 
 
 def build_client() -> genai.Client:
-    api_key = os.getenv("GOOGLE_API_KEY")
+    """
+    Create a Gemini client.
+
+    The SDK will automatically pick up:
+      - GOOGLE_API_KEY  or
+      - GEMINI_API_KEY
+
+    We still sanity-check that at least one is set so error messages
+    are clearer for you.
+    """
+    api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
     if not api_key:
-        raise RuntimeError("GOOGLE_API_KEY environment variable is not set.")
+        raise RuntimeError(
+            "GOOGLE_API_KEY or GEMINI_API_KEY must be set in the environment."
+        )
+    # You can either pass api_key explicitly or let the client read from env.
     client = genai.Client(api_key=api_key)
     return client
 
 
-def build_tool_schema() -> List[genai_types.Tool]:
-    """
-    Define tools that Gemini can call.
-
-    We map our Python functions to function declarations that the model understands.
-    """
-    return [
-        genai_types.Tool(
-            function_declarations=[
-                genai_types.FunctionDeclaration(
-                    name="tool_run_portfolio_analysis",
-                    description=(
-                        "Analyze a Kaggle experiments CSV and return a summary, "
-                        "including best experiment, overfitting, and timings."
-                    ),
-                    parameters={
-                        "type": "object",
-                        "properties": {
-                            "experiments_path": {
-                                "type": "string",
-                                "description": (
-                                    "Path to the experiments CSV. "
-                                    "If omitted, use the default sample file."
-                                ),
-                            }
-                        },
-                        "required": [],
-                    },
-                ),
-                genai_types.FunctionDeclaration(
-                    name="tool_get_best_experiment",
-                    description="Return the best CV experiment's details.",
-                    parameters={
-                        "type": "object",
-                        "properties": {
-                            "experiments_path": {
-                                "type": "string",
-                                "description": "Optional path to experiments CSV.",
-                            }
-                        },
-                        "required": [],
-                    },
-                ),
-                genai_types.FunctionDeclaration(
-                    name="tool_get_overfitting_info",
-                    description=(
-                        "Return information about the most overfitted experiment, "
-                        "where CV - holdout gap is largest."
-                    ),
-                    parameters={
-                        "type": "object",
-                        "properties": {
-                            "experiments_path": {
-                                "type": "string",
-                                "description": "Optional path to experiments CSV.",
-                            }
-                        },
-                        "required": [],
-                    },
-                ),
-                genai_types.FunctionDeclaration(
-                    name="tool_get_time_stats",
-                    description="Return training time statistics and per-model timings.",
-                    parameters={
-                        "type": "object",
-                        "properties": {
-                            "experiments_path": {
-                                "type": "string",
-                                "description": "Optional path to experiments CSV.",
-                            }
-                        },
-                        "required": [],
-                    },
-                ),
-            ]
-        )
-    ]
-
-
-def call_tool_by_name(
-    name: str,
-    args: Dict[str, Any],
-) -> Any:
-    """
-    Dispatch from a tool call name to the corresponding Python function.
-    """
-    if name == "tool_run_portfolio_analysis":
-        return adk_tools.tool_run_portfolio_analysis(**args)
-    if name == "tool_get_best_experiment":
-        return adk_tools.tool_get_best_experiment(**args)
-    if name == "tool_get_overfitting_info":
-        return adk_tools.tool_get_overfitting_info(**args)
-    if name == "tool_get_time_stats":
-        return adk_tools.tool_get_time_stats(**args)
-
-    raise ValueError(f"Unknown tool name: {name}")
-
-
 def interactive_loop() -> None:
     """
-    Start an interactive loop with the LLM-powered agent.
+    Start an interactive loop with the Gemini-powered agent.
+
+    We pass our Python functions as tools. The SDK will:
+      - read their docstrings + signatures
+      - let the model decide when/how to call them
+      - automatically execute the functions
+      - include their results in response.text
     """
     client = build_client()
-    tools = build_tool_schema()
 
-    # We'll use a single ongoing "chat" session (stream of messages)
-    history: List[genai_types.Content] = []
+    # Our Python tools that the model can call
+    tools = [
+        adk_tools.tool_run_portfolio_analysis,
+        adk_tools.tool_get_best_experiment,
+        adk_tools.tool_get_overfitting_info,
+        adk_tools.tool_get_time_stats,
+    ]
+
+    # Optional: give the model some instructions about its role
+    system_instruction = (
+        "You are a Kaggle experiment portfolio assistant. "
+        "You help analyze a CSV of experiment results and answer questions "
+        "about best experiments, overfitting (CV vs holdout), and training time. "
+        "Use the provided tools when helpful, and explain your reasoning clearly."
+    )
 
     print("=== Kaggle Experiment Orchestrator Lite – Gemini Agent ===")
     print("Type your questions about your experiment portfolio.")
-    print("Example: 'Which experiment is the best?' or 'Where am I overfitting?'")
+    print("Examples:")
+    print("  - Which experiment is the best?")
+    print("  - Where am I overfitting?")
+    print("  - Which models are fastest to train?")
     print("Type 'exit' to quit.\n")
 
     while True:
@@ -153,84 +90,35 @@ def interactive_loop() -> None:
         if not user_input:
             continue
 
-        # Add user message to history
-        history.append(
-            genai_types.Content(
-                role="user",
-                parts=[genai_types.Part.from_text(user_input)],
-            )
-        )
-
-        # First call: let the model respond, possibly with tool calls
+        # Call Gemini with automatic function calling + our tools
         response = client.models.generate_content(
-            model="gemini-1.5-flash-latest",  # or another Gemini model
-            contents=history,
-            tools=tools,
+            model="gemini-2.5-flash",
+            contents=user_input,
+            config=genai_types.GenerateContentConfig(
+                tools=tools,
+                system_instruction=system_instruction,
+                temperature=0.2,  # make it a bit more deterministic
+            ),
         )
 
-        # Check for tool calls
-        tool_calls = []
-        for part in response.candidates[0].content.parts:
-            if part.function_call:
-                tool_calls.append(part.function_call)
-
-        # If there are no tool calls, just print the response
-        if not tool_calls:
-            text = response.candidates[0].content.parts[0].text
-            print(f"\nagent> {text}\n")
-            history.append(response.candidates[0].content)
-            continue
-
-        # If there ARE tool calls, execute them and send results back
-        tool_results_parts: List[genai_types.Part] = []
-
-        for fc in tool_calls:
-            name = fc.name
-            args = dict(fc.args or {})
-            try:
-                result = call_tool_by_name(name, args)
-            except Exception as e:
-                result = {"error": str(e)}
-
-            # Each tool result is added as a function response part
-            tool_results_parts.append(
-                genai_types.Part.from_function_response(
-                    name=name,
-                    response={"result": result},
-                )
-            )
-
-        # Add the tool responses as a new message from "tool" role
-        history.append(
-            genai_types.Content(
-                role="tool",
-                parts=tool_results_parts,
-            )
-        )
-
-        # Now let the model see the tool results and produce a final answer
-        followup = client.models.generate_content(
-            model="gemini-1.5-flash-latest",
-            contents=history,
-        )
-
-        final_text = followup.candidates[0].content.parts[0].text
-        print(f"\nagent> {final_text}\n")
-
-        # Add the final answer to history
-        history.append(followup.candidates[0].content)
+        # With automatic function calling, Gemini executes the Python tools
+        # and we can just read response.text as the final answer.
+        print("\nagent>")
+        print(response.text)
+        print("")
 
 
 def main() -> None:
     """
     Entry point when running as a module.
     """
-    # Ensure default file exists (helpful error if not)
+    # Optional: warn if default CSV missing
     project_root = Path(__file__).resolve().parents[1]
     default_csv = project_root / "data" / "sample_experiments.csv"
     if not default_csv.exists():
         print(f"WARNING: default experiments file not found at {default_csv}")
-        print("Some tool calls may fail unless you provide a path.")
+        print("The tools that read experiments may fail unless you pass a path.\n")
+
     interactive_loop()
 
 
