@@ -4,7 +4,7 @@ import os
 import json
 from pathlib import Path
 from typing import Optional
-
+from IPython.display import Markdown
 from google import genai
 from google.genai import types as genai_types
 
@@ -68,29 +68,50 @@ def answer_question(
         "stability_top5": rank_stability,
         "speed_top5": rank_speed,
     }
+    strategy_explanation = """
+        Ranking strategies:
+        - balanced: trade-off between CV, overfitting (small CV–holdout gap), and train speed.
+        - leaderboard: prioritize highest CV, accept some overfitting and slower models.
+        - stability: prioritize small CV–holdout gap, even if CV is slightly lower.
+        - speed: prioritize faster models with acceptable CV for quick iteration.
+
+        When the user does not state explicit goals, you should:
+        - explain these trade-offs, and
+        - suggest which strategy fits common Kaggle goals (maximize LB, stable scores, fast iteration).
+        Never say you cannot answer; instead, explain options and what you recommend.
+        """
 
     prompt = f"""
-            You are a Kaggle experiment portfolio assistant.
+        You are a Kaggle experiment portfolio assistant.
 
-            You are given:
-            1) A JSON summary of experiments (per-model stats, best experiment, overfitting info, times).
-            2) A human-readable text report.
-            3) A user question.
+        You are given:
+        1) A JSON summary of experiments (per-model stats, best experiment, overfitting info, times).
+        2) A human-readable text report.
+        3) Ranking tables for four strategies (balanced, leaderboard, stability, speed).
+        4) A description of what each strategy means.
+        5) A user question.
 
-            Use ONLY this information to answer the question clearly and concisely.
-            If something is not available in the data, say so.
+        Use ALL of this information to answer clearly and concisely.
+        If the user does not specify goals, explain the trade-offs between strategies
+        and recommend which strategies typically match common Kaggle goals
+        (e.g. 'maximize leaderboard score', 'fast iteration', 'stable public/private scores').
+        Do NOT answer that you cannot help.
 
-            === EXPERIMENT SUMMARY (JSON) ===
-            {context_json}
+        === EXPERIMENT SUMMARY (JSON) ===
+        {context_json}
 
-            === EXPERIMENT REPORT (TEXT) ===
-            {text_report}
-            === RANKING TABLES (TOP 5 IN EACH STRATEGY) ===
-            {json.dumps(ranking_block, indent=2)}
+        === EXPERIMENT REPORT (TEXT) ===
+        {text_report}
 
-            === USER QUESTION ===
-            {question}
-            """
+        === RANKING TABLES (TOP 5 IN EACH STRATEGY) ===
+        {json.dumps(ranking_block, indent=2)}
+
+        === STRATEGY EXPLANATION ===
+        {strategy_explanation}
+
+        === USER QUESTION ===
+        {question}
+        """
 
     # 3) Ask Gemini to answer based on this context
     response = client.models.generate_content(
