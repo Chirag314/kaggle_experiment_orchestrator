@@ -50,27 +50,47 @@ def answer_question(
 
     # 2) Build a rich prompt with JSON + human-readable summary
     context_json = json.dumps(summary, indent=2)
+    from orchestrator_agent.ranking import rank_experiments
+
+    # Add ranking strategies
+    df = adk_tools.load_experiments(experiments_path)
+
+    rank_balanced = rank_experiments(df, "balanced").head(5).to_dict(orient="records")
+    rank_leaderboard = (
+        rank_experiments(df, "leaderboard").head(5).to_dict(orient="records")
+    )
+    rank_stability = rank_experiments(df, "stability").head(5).to_dict(orient="records")
+    rank_speed = rank_experiments(df, "speed").head(5).to_dict(orient="records")
+
+    ranking_block = {
+        "balanced_top5": rank_balanced,
+        "leaderboard_top5": rank_leaderboard,
+        "stability_top5": rank_stability,
+        "speed_top5": rank_speed,
+    }
 
     prompt = f"""
-You are a Kaggle experiment portfolio assistant.
+            You are a Kaggle experiment portfolio assistant.
 
-You are given:
-1) A JSON summary of experiments (per-model stats, best experiment, overfitting info, times).
-2) A human-readable text report.
-3) A user question.
+            You are given:
+            1) A JSON summary of experiments (per-model stats, best experiment, overfitting info, times).
+            2) A human-readable text report.
+            3) A user question.
 
-Use ONLY this information to answer the question clearly and concisely.
-If something is not available in the data, say so.
+            Use ONLY this information to answer the question clearly and concisely.
+            If something is not available in the data, say so.
 
-=== EXPERIMENT SUMMARY (JSON) ===
-{context_json}
+            === EXPERIMENT SUMMARY (JSON) ===
+            {context_json}
 
-=== EXPERIMENT REPORT (TEXT) ===
-{text_report}
+            === EXPERIMENT REPORT (TEXT) ===
+            {text_report}
+            === RANKING TABLES (TOP 5 IN EACH STRATEGY) ===
+            {json.dumps(ranking_block, indent=2)}
 
-=== USER QUESTION ===
-{question}
-"""
+            === USER QUESTION ===
+            {question}
+            """
 
     # 3) Ask Gemini to answer based on this context
     response = client.models.generate_content(
