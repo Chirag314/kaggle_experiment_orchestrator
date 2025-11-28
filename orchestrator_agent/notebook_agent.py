@@ -7,6 +7,7 @@ from typing import Optional
 from IPython.display import Markdown
 from google import genai
 from google.genai import types as genai_types
+from .tools import load_experiments
 
 from . import adk_tools
 
@@ -53,7 +54,7 @@ def answer_question(
     from orchestrator_agent.ranking import rank_experiments
 
     # Add ranking strategies
-    df = adk_tools.load_experiments(experiments_path)
+    df = load_experiments(experiments_path)
 
     rank_balanced = rank_experiments(df, "balanced").head(5).to_dict(orient="records")
     rank_leaderboard = (
