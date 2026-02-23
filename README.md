@@ -37,58 +37,49 @@ Below is the logical architecture of the Orchestrator Agent layer.
 
 ---
 
-## Architecture Diagram (SVG)
+## 🏗 Architecture Diagram
 
 <svg viewBox="0 0 900 520" xmlns="http://www.w3.org/2000/svg">
-  <style>
-    .box { fill:#f4f6f8; stroke:#333; stroke-width:1.5; rx:10; }
-    .text { font-family:monospace; font-size:14px; fill:#111; }
-    .arrow { stroke:#444; stroke-width:2; marker-end:url(#arrowhead); }
-  </style>
-
-  <defs>
-    <marker id="arrowhead" markerWidth="10" markerHeight="7"
-            refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#444"/>
-    </marker>
-  </defs>
 
   <!-- CSV -->
-  <rect class="box" x="300" y="20" width="300" height="50"/>
-  <text class="text" x="375" y="50">experiments.csv</text>
+  <rect x="300" y="20" width="300" height="50" fill="#f4f6f8" stroke="#333" stroke-width="1.5" rx="10"/>
+  <text x="375" y="50" font-family="monospace" font-size="14" fill="#111">experiments.csv</text>
 
   <!-- Tools -->
-  <rect class="box" x="250" y="100" width="400" height="60"/>
-  <text class="text" x="300" y="135">tools.py → summarize_experiments()</text>
+  <rect x="250" y="100" width="400" height="60" fill="#f4f6f8" stroke="#333" stroke-width="1.5" rx="10"/>
+  <text x="300" y="135" font-family="monospace" font-size="14">tools.py → summarize_experiments()</text>
 
   <!-- Orchestrator -->
-  <rect class="box" x="250" y="190" width="400" height="60"/>
-  <text class="text" x="280" y="225">orchestrator.py → portfolio intelligence</text>
+  <rect x="250" y="190" width="400" height="60" fill="#f4f6f8" stroke="#333" stroke-width="1.5" rx="10"/>
+  <text x="280" y="225" font-family="monospace" font-size="14">orchestrator.py → portfolio intelligence</text>
 
   <!-- Ranking -->
-  <rect class="box" x="250" y="280" width="400" height="60"/>
-  <text class="text" x="295" y="315">ranking.py → multi-strategy scoring</text>
+  <rect x="250" y="280" width="400" height="60" fill="#f4f6f8" stroke="#333" stroke-width="1.5" rx="10"/>
+  <text x="295" y="315" font-family="monospace" font-size="14">ranking.py → multi-strategy scoring</text>
 
-  <!-- Agents -->
-  <rect class="box" x="100" y="380" width="250" height="70"/>
-  <text class="text" x="140" y="415">cli_agent.py</text>
-  <text class="text" x="130" y="435">Rule-based agent</text>
+  <!-- CLI Agent -->
+  <rect x="100" y="380" width="250" height="70" fill="#f4f6f8" stroke="#333" stroke-width="1.5" rx="10"/>
+  <text x="140" y="415" font-family="monospace" font-size="14">cli_agent.py</text>
+  <text x="120" y="435" font-family="monospace" font-size="14">Rule-based agent</text>
 
-  <rect class="box" x="375" y="380" width="250" height="70"/>
-  <text class="text" x="410" y="415">adk_agent_cli.py</text>
-  <text class="text" x="395" y="435">Gemini tool-calling agent</text>
+  <!-- Gemini Agent -->
+  <rect x="375" y="380" width="250" height="70" fill="#f4f6f8" stroke="#333" stroke-width="1.5" rx="10"/>
+  <text x="410" y="415" font-family="monospace" font-size="14">adk_agent_cli.py</text>
+  <text x="390" y="435" font-family="monospace" font-size="14">Gemini tool-calling agent</text>
 
-  <rect class="box" x="650" y="380" width="220" height="70"/>
-  <text class="text" x="675" y="415">template_agent.py</text>
-  <text class="text" x="675" y="435">Notebook + model selection</text>
+  <!-- Template Agent -->
+  <rect x="650" y="380" width="220" height="70" fill="#f4f6f8" stroke="#333" stroke-width="1.5" rx="10"/>
+  <text x="675" y="415" font-family="monospace" font-size="14">template_agent.py</text>
+  <text x="665" y="435" font-family="monospace" font-size="14">Notebook + model selection</text>
 
-  <!-- Arrows -->
-  <line class="arrow" x1="450" y1="70" x2="450" y2="100"/>
-  <line class="arrow" x1="450" y1="160" x2="450" y2="190"/>
-  <line class="arrow" x1="450" y1="250" x2="450" y2="280"/>
-  <line class="arrow" x1="450" y1="340" x2="225" y2="380"/>
-  <line class="arrow" x1="450" y1="340" x2="500" y2="380"/>
-  <line class="arrow" x1="450" y1="340" x2="760" y2="380"/>
+  <!-- Lines -->
+  <line x1="450" y1="70" x2="450" y2="100" stroke="#444" stroke-width="2"/>
+  <line x1="450" y1="160" x2="450" y2="190" stroke="#444" stroke-width="2"/>
+  <line x1="450" y1="250" x2="450" y2="280" stroke="#444" stroke-width="2"/>
+  <line x1="450" y1="340" x2="225" y2="380" stroke="#444" stroke-width="2"/>
+  <line x1="450" y1="340" x2="500" y2="380" stroke="#444" stroke-width="2"/>
+  <line x1="450" y1="340" x2="760" y2="380" stroke="#444" stroke-width="2"/>
+
 </svg>
 
 ---
