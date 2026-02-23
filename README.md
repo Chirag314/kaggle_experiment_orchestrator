@@ -150,11 +150,6 @@ Below is the logical architecture of the Orchestrator Agent layer.
 
 ---
 
-### Pin description (short)
-
-Agent-driven Kaggle experiment portfolio analyzer with strategy-aware ranking, overfitting diagnostics, and Gemini tool-calling support.
-
----
 
 # 🌟 Core Capabilities
 
