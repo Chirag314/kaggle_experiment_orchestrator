@@ -39,48 +39,120 @@ Below is the logical architecture of the Orchestrator Agent layer.
 
 ## 🏗 Architecture Diagram
 
-<svg viewBox="0 0 900 520" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 980 520" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect x="0" y="0" width="980" height="520" fill="#ffffff"/>
 
-  <!-- CSV -->
-  <rect x="300" y="20" width="300" height="50" fill="#f4f6f8" stroke="#333" stroke-width="1.5" rx="10"/>
-  <text x="375" y="50" font-family="monospace" font-size="14" fill="#111">experiments.csv</text>
+  <!-- Title -->
+  <text x="40" y="48" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
+        font-size="18" font-weight="600" fill="#0b0f19">
+    Orchestrator Agent — Portfolio Intelligence Flow
+  </text>
+  <text x="40" y="72" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
+        font-size="12" fill="#667085">
+    experiments.csv → analysis → ranking → agents (CLI / Gemini / template)
+  </text>
 
-  <!-- Tools -->
-  <rect x="250" y="100" width="400" height="60" fill="#f4f6f8" stroke="#333" stroke-width="1.5" rx="10"/>
-  <text x="300" y="135" font-family="monospace" font-size="14">tools.py → summarize_experiments()</text>
+  <!-- Helpers: consistent styles (inline only) -->
+  <!-- Boxes -->
+  <!-- Column 1 -->
+  <rect x="40" y="110" width="300" height="82" rx="14" fill="#ffffff" stroke="#101828" stroke-width="1.5"/>
+  <text x="62" y="142" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace"
+        font-size="13" fill="#101828" font-weight="600">experiments.csv</text>
+  <text x="62" y="166" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
+        font-size="12" fill="#667085">Source of truth for portfolio runs</text>
 
-  <!-- Orchestrator -->
-  <rect x="250" y="190" width="400" height="60" fill="#f4f6f8" stroke="#333" stroke-width="1.5" rx="10"/>
-  <text x="280" y="225" font-family="monospace" font-size="14">orchestrator.py → portfolio intelligence</text>
+  <rect x="40" y="214" width="300" height="110" rx="14" fill="#ffffff" stroke="#101828" stroke-width="1.5"/>
+  <text x="62" y="246" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace"
+        font-size="13" fill="#101828" font-weight="600">tools.py</text>
+  <text x="62" y="268" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
+        font-size="12" fill="#667085">Load CSV + validate schema</text>
+  <text x="62" y="288" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
+        font-size="12" fill="#667085">Compute portfolio stats (best, gap, time)</text>
+  <text x="62" y="308" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
+        font-size="12" fill="#667085">Format human-readable summary</text>
 
-  <!-- Ranking -->
-  <rect x="250" y="280" width="400" height="60" fill="#f4f6f8" stroke="#333" stroke-width="1.5" rx="10"/>
-  <text x="295" y="315" font-family="monospace" font-size="14">ranking.py → multi-strategy scoring</text>
+  <!-- Column 2 -->
+  <rect x="380" y="150" width="300" height="110" rx="14" fill="#ffffff" stroke="#101828" stroke-width="1.5"/>
+  <text x="402" y="182" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace"
+        font-size="13" fill="#101828" font-weight="600">orchestrator.py</text>
+  <text x="402" y="204" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
+        font-size="12" fill="#667085">High-level pipeline:</text>
+  <text x="402" y="224" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
+        font-size="12" fill="#667085">load → summarize → report → return dict</text>
+  <text x="402" y="244" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
+        font-size="12" fill="#667085">Agent-ready interface (no LLM required)</text>
 
-  <!-- CLI Agent -->
-  <rect x="100" y="380" width="250" height="70" fill="#f4f6f8" stroke="#333" stroke-width="1.5" rx="10"/>
-  <text x="140" y="415" font-family="monospace" font-size="14">cli_agent.py</text>
-  <text x="120" y="435" font-family="monospace" font-size="14">Rule-based agent</text>
+  <rect x="380" y="282" width="300" height="110" rx="14" fill="#ffffff" stroke="#101828" stroke-width="1.5"/>
+  <text x="402" y="314" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace"
+        font-size="13" fill="#101828" font-weight="600">ranking.py</text>
+  <text x="402" y="336" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
+        font-size="12" fill="#667085">Composite scoring:</text>
+  <text x="402" y="356" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
+        font-size="12" fill="#667085">balanced • leaderboard • stability • speed</text>
+  <text x="402" y="376" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
+        font-size="12" fill="#667085">CV ↑, gap ↓, time ↓</text>
 
-  <!-- Gemini Agent -->
-  <rect x="375" y="380" width="250" height="70" fill="#f4f6f8" stroke="#333" stroke-width="1.5" rx="10"/>
-  <text x="410" y="415" font-family="monospace" font-size="14">adk_agent_cli.py</text>
-  <text x="390" y="435" font-family="monospace" font-size="14">Gemini tool-calling agent</text>
+  <!-- Column 3: Agents -->
+  <rect x="720" y="110" width="220" height="86" rx="14" fill="#ffffff" stroke="#101828" stroke-width="1.5"/>
+  <text x="742" y="142" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace"
+        font-size="13" fill="#101828" font-weight="600">cli_agent.py</text>
+  <text x="742" y="164" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
+        font-size="12" fill="#667085">Rule-based agent (REPL)</text>
 
-  <!-- Template Agent -->
-  <rect x="650" y="380" width="220" height="70" fill="#f4f6f8" stroke="#333" stroke-width="1.5" rx="10"/>
-  <text x="675" y="415" font-family="monospace" font-size="14">template_agent.py</text>
-  <text x="665" y="435" font-family="monospace" font-size="14">Notebook + model selection</text>
+  <rect x="720" y="214" width="220" height="110" rx="14" fill="#ffffff" stroke="#101828" stroke-width="1.5"/>
+  <text x="742" y="246" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace"
+        font-size="13" fill="#101828" font-weight="600">adk_agent_cli.py</text>
+  <text x="742" y="268" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
+        font-size="12" fill="#667085">Gemini agent w/ tool-calling</text>
+  <text x="742" y="288" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
+        font-size="12" fill="#667085">Uses adk_tools.py wrappers</text>
+  <text x="742" y="308" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
+        font-size="12" fill="#667085">Answers portfolio questions</text>
 
-  <!-- Lines -->
-  <line x1="450" y1="70" x2="450" y2="100" stroke="#444" stroke-width="2"/>
-  <line x1="450" y1="160" x2="450" y2="190" stroke="#444" stroke-width="2"/>
-  <line x1="450" y1="250" x2="450" y2="280" stroke="#444" stroke-width="2"/>
-  <line x1="450" y1="340" x2="225" y2="380" stroke="#444" stroke-width="2"/>
-  <line x1="450" y1="340" x2="500" y2="380" stroke="#444" stroke-width="2"/>
-  <line x1="450" y1="340" x2="760" y2="380" stroke="#444" stroke-width="2"/>
+  <rect x="720" y="346" width="220" height="110" rx="14" fill="#ffffff" stroke="#101828" stroke-width="1.5"/>
+  <text x="742" y="378" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace"
+        font-size="13" fill="#101828" font-weight="600">template_agent.py</text>
+  <text x="742" y="400" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
+        font-size="12" fill="#667085">Notebook template generator</text>
+  <text x="742" y="420" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
+        font-size="12" fill="#667085">Goal-based model selection</text>
 
+  <!-- Connectors (simple lines + triangle arrows) -->
+  <!-- experiments.csv -> tools.py -->
+  <line x1="190" y1="192" x2="190" y2="214" stroke="#101828" stroke-width="2"/>
+  <polygon points="190,214 184,204 196,204" fill="#101828"/>
+
+  <!-- tools.py -> orchestrator.py -->
+  <line x1="340" y1="250" x2="380" y2="205" stroke="#101828" stroke-width="2"/>
+  <polygon points="380,205 368,205 375,215" fill="#101828"/>
+
+  <!-- orchestrator.py -> ranking.py -->
+  <line x1="530" y1="260" x2="530" y2="282" stroke="#101828" stroke-width="2"/>
+  <polygon points="530,282 524,272 536,272" fill="#101828"/>
+
+  <!-- ranking.py -> agents -->
+  <line x1="680" y1="336" x2="720" y2="153" stroke="#101828" stroke-width="2"/>
+  <polygon points="720,153 708,153 715,163" fill="#101828"/>
+
+  <line x1="680" y1="350" x2="720" y2="270" stroke="#101828" stroke-width="2"/>
+  <polygon points="720,270 708,270 715,280" fill="#101828"/>
+
+  <line x1="680" y1="370" x2="720" y2="401" stroke="#101828" stroke-width="2"/>
+  <polygon points="720,401 708,401 715,411" fill="#101828"/>
+
+  <!-- Footer note -->
+  <text x="40" y="492" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
+        font-size="12" fill="#667085">
+    Tip: For perfect GitHub rendering, you can also save this SVG as docs/architecture.svg and embed it via Markdown.
+  </text>
 </svg>
+
+---
+
+### Pin description (short)
+
+Agent-driven Kaggle experiment portfolio analyzer with strategy-aware ranking, overfitting diagnostics, and Gemini tool-calling support.
 
 ---
 
