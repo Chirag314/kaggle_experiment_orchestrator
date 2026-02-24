@@ -16,7 +16,7 @@ can see the structure clearly.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any
 
 from .orchestrator import run_portfolio_analysis
 
@@ -38,9 +38,9 @@ class PortfolioAgent:
     def __init__(self, experiments_path: str | Path) -> None:
         self.project_root = Path(__file__).resolve().parents[1]
         self.experiments_path = Path(experiments_path)
-        self._last_result: Dict[str, Any] | None = None
+        self._last_result: dict[str, Any] | None = None
 
-    def ensure_analysis(self) -> Dict[str, Any]:
+    def ensure_analysis(self) -> dict[str, Any]:
         """
         Run portfolio analysis once and cache the result, so repeated
         queries don't re-load the CSV every time.
@@ -121,8 +121,7 @@ class PortfolioAgent:
         ]
         for model, stats in per_model.items():
             lines.append(
-                f"  {model}: mean {stats['mean_train_time']:.1f}s "
-                f"over {stats['n_runs']} runs"
+                f"  {model}: mean {stats['mean_train_time']:.1f}s over {stats['n_runs']} runs"
             )
 
         lines.append(

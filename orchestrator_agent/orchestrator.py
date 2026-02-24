@@ -11,15 +11,15 @@ This is our first "agent-like" layer:
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any
 
-from .tools import load_experiments, summarize_experiments, format_summary_text
+from .tools import format_summary_text, load_experiments, summarize_experiments
 
 
 def run_portfolio_analysis(
     experiments_path: str | Path,
     verbose: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     High-level function that:
       - Loads experiment results
@@ -39,7 +39,7 @@ def run_portfolio_analysis(
         print(text_report)
         print("\n========================================\n")
 
-    result: Dict[str, Any] = {
+    result: dict[str, Any] = {
         "experiments_path": str(experiments_path.resolve()),
         "summary": summary,
         "text_report": text_report,

@@ -1,29 +1,26 @@
 from __future__ import annotations
 
-import os
 import json
+import os
 from pathlib import Path
-from typing import Optional
-from IPython.display import Markdown
+
 from google import genai
 from google.genai import types as genai_types
-from .tools import load_experiments
 
 from . import adk_tools
+from .tools import load_experiments
 
 
 def _build_client() -> genai.Client:
     api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
     if not api_key:
-        raise RuntimeError(
-            "GOOGLE_API_KEY or GEMINI_API_KEY must be set in the environment."
-        )
+        raise RuntimeError("GOOGLE_API_KEY or GEMINI_API_KEY must be set in the environment.")
     return genai.Client(api_key=api_key)
 
 
 def answer_question(
     question: str,
-    experiments_path: Optional[str] = None,
+    experiments_path: str | None = None,
     model: str = "gemini-2.5-flash",
     temperature: float = 0.2,
 ) -> str:
@@ -57,9 +54,7 @@ def answer_question(
     df = load_experiments(experiments_path)
 
     rank_balanced = rank_experiments(df, "balanced").head(5).to_dict(orient="records")
-    rank_leaderboard = (
-        rank_experiments(df, "leaderboard").head(5).to_dict(orient="records")
-    )
+    rank_leaderboard = rank_experiments(df, "leaderboard").head(5).to_dict(orient="records")
     rank_stability = rank_experiments(df, "stability").head(5).to_dict(orient="records")
     rank_speed = rank_experiments(df, "speed").head(5).to_dict(orient="records")
 

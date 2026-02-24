@@ -11,12 +11,11 @@ and where to plug in the experiment orchestrator.
 from __future__ import annotations
 
 import os
-from typing import Optional
 
+import nbformat
 from google import genai
 from google.genai import types as genai_types
-import nbformat
-from nbformat.v4 import new_notebook, new_markdown_cell, new_code_cell
+from nbformat.v4 import new_code_cell, new_markdown_cell, new_notebook
 
 from orchestrator_agent import adk_tools
 from orchestrator_agent.ranking import rank_experiments
@@ -25,9 +24,7 @@ from orchestrator_agent.ranking import rank_experiments
 def _build_client() -> genai.Client:
     api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
     if not api_key:
-        raise RuntimeError(
-            "GOOGLE_API_KEY or GEMINI_API_KEY must be set in the environment."
-        )
+        raise RuntimeError("GOOGLE_API_KEY or GEMINI_API_KEY must be set in the environment.")
     return genai.Client(api_key=api_key)
 
 
@@ -224,9 +221,7 @@ def select_models_for_goal(
     # Load and rank experiments with all strategies
     df = adk_tools.load_experiments(experiments_path)
 
-    ranked_balanced = (
-        rank_experiments(df, "balanced").head(10).to_dict(orient="records")
-    )
+    ranked_balanced = rank_experiments(df, "balanced").head(10).to_dict(orient="records")
     ranked_lb = rank_experiments(df, "leaderboard").head(10).to_dict(orient="records")
     ranked_stable = rank_experiments(df, "stability").head(10).to_dict(orient="records")
     ranked_speed = rank_experiments(df, "speed").head(10).to_dict(orient="records")

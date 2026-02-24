@@ -2,13 +2,27 @@
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
 
-# Virtual environment
+# Virtual env
 .venv/
+venv/
 
-# VSCode
-.vscode/
+# Notebooks
+.ipynb_checkpoints/
 
-# OS files
-Thumbs.db
+# Data & outputs (local only)
+data/
+outputs/
+artifacts/
+
+# OS
 .DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

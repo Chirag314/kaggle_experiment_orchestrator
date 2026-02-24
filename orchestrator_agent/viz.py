@@ -10,7 +10,7 @@ These are plain matplotlib-based functions meant to be used in:
 
 from __future__ import annotations
 
-from typing import Optional, Dict, Any
+from typing import Any
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -57,9 +57,7 @@ def plot_time_vs_cv(df: pd.DataFrame, title: str = "Train Time vs CV"):
     plt.show()
 
 
-def plot_model_family_performance(
-    summary: Dict[str, Any], title: str = "Model Family Mean CV"
-):
+def plot_model_family_performance(summary: dict[str, Any], title: str = "Model Family Mean CV"):
     """
     Bar chart: mean CV by model_type using the summary dict.
     """
