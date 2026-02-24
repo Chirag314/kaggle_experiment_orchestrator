@@ -13,10 +13,9 @@ Supports different strategies (balanced, leaderboard, stability, speed).
 
 from __future__ import annotations
 
-from typing import Literal, Dict, Any
+from typing import Literal
 
 import pandas as pd
-
 
 Strategy = Literal["balanced", "leaderboard", "stability", "speed"]
 

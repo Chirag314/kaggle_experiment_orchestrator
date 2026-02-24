@@ -115,14 +115,10 @@ def tool_suggest_next_experiments(experiments_path=None):
             "feature regularization, or reduce model complexity."
         )
     else:
-        suggestions.append(
-            "👍 CV–holdout gap is reasonable → explore additional features safely."
-        )
+        suggestions.append("👍 CV–holdout gap is reasonable → explore additional features safely.")
 
     # 3. Try an alternative model family with strong mean CV
-    sorted_models = sorted(
-        model_stats.items(), key=lambda x: x[1]["mean_cv"], reverse=True
-    )
+    sorted_models = sorted(model_stats.items(), key=lambda x: x[1]["mean_cv"], reverse=True)
     if len(sorted_models) > 1:
         next_best_model = sorted_models[1][0]
         suggestions.append(
@@ -164,8 +160,8 @@ def tool_rank_experiments(experiments_path=None, strategy="balanced"):
     """
     Rank experiments and return a compact view (id, model_type, rank_score, cv, holdout, time).
     """
-    from .tools import load_experiments  # local import to avoid cycles
     from .ranking import rank_experiments
+    from .tools import load_experiments  # local import to avoid cycles
 
     df = load_experiments(experiments_path)
     ranked = rank_experiments(df, strategy=strategy)

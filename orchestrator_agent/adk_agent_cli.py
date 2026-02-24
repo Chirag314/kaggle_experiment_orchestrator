@@ -38,9 +38,7 @@ def build_client() -> genai.Client:
     """
     api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
     if not api_key:
-        raise RuntimeError(
-            "GOOGLE_API_KEY or GEMINI_API_KEY must be set in the environment."
-        )
+        raise RuntimeError("GOOGLE_API_KEY or GEMINI_API_KEY must be set in the environment.")
     # You can either pass api_key explicitly or let the client read from env.
     client = genai.Client(api_key=api_key)
     return client

@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "keo"
+version = "0.1.0"
+description = "Kaggle Experiment Orchestrator — portfolio intelligence + agent layer"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Chirag Desai" }]
+license = { text = "MIT" }
+dependencies = [
+  "pandas>=2.0",
+  "numpy>=1.24",
+  "matplotlib>=3.7",
+  "nbformat>=5.9",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.4",
+  "ruff>=0.5",
+  "pre-commit>=3.6",
+]
+gemini = [
+  "google-genai>=0.3.0",
+  "ipython>=8.0",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+fix = true
+exclude = ["orchestrator_agent"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
